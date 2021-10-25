@@ -1,56 +1,77 @@
 import React from "react"
 import './App.css';
 
+//firebase sdk
 import firebase from "firebase/app";
 import "firebase/firestore";
-import "firebase/auth";
+import "firebase/auth"
 
+//hooks
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useCollectionData } from "react-firebase-hooks/firestore"
 
 firebase.initializeApp({
-  apiKey: "AIzaSyDgRknu2rRIrSMVqj8_WAfvL0Qm8OIku-I",
-  authDomain: "chitchat-d90f0.firebaseapp.com",
-  projectId: "chitchat-d90f0",
-  storageBucket: "chitchat-d90f0.appspot.com",
-  messagingSenderId: "203058000996",
-  appId: "1:203058000996:web:77de06c14d474a15271b71",
-  measurementId: "G-CFSLMWRGMK" 
+    apiKey: "AIzaSyAipfWmG7GVy3t-e2D7fKGsNUlcq1fOl2k",
+  authDomain: "chat-app-a4e9d.firebaseapp.com",
+  projectId: "chat-app-a4e9d",
+  storageBucket: "chat-app-a4e9d.appspot.com",
+  messagingSenderId: "427244418673",
+  appId: "1:427244418673:web:f3f7b01f719348614f8dd0",
+  measurementId: "G-R3Z7EM45JC"
 })
 
+//reference to auth and firestore
 const auth = firebase.auth();
-const firestore = firebase.firestore(); 
+const firestore = firebase.firestore();
 
 function App() {
 
   const [user] = useAuthState(auth);
-
+  
   return (
     <div className="App">
-      <header className="App-header">
-        
-      </header>
       <section>
-        {user ? <ChatRoom /> : <SignIn />}
+        { user ? <ChatRoom /> : <SignIn />}
       </section>
     </div>
   );
 }
 
-function SignIn(){
+function SignIn() {
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
   }
   return (
-    <button onClick={signInWithGoogle}>Sign in with google</button>
+    <button onClick={ signInWithGoogle}>Sign In with Google</button>
   )
 }
 
-function SignOut(){
+function signOut() {
   return auth.currentUser && (
-    <button onClick={() => auth.signOut()}>SignOut</button>
+    <button onClick={ () => auth.signOut()}>Sign Out</button>
   )
+}
+
+function ChatRoom() {
+  const messagesRef = firestore.collection('messages')
+  const query = messagesRef.orderBy('createdAt').limit(25);
+
+  const [messages] = useCollectionData(query, { idField: 'id' })
+  
+  return (
+    <>
+      <div>
+        {messages && messages.map(msg => <ChatMessage key={msg.id} message={ msg} />)}
+      </div>
+    </>
+  )
+}
+
+function ChatMessage(props) {
+  const { text, uid } = props.message;
+
+  return <p>{ text}</p>
 }
 
 export default App;
